@@ -21,10 +21,7 @@ export async function POST(request: Request) {
   const input = body as { digest?: string; topicId?: string };
   const digest = typeof input.digest === "string" ? input.digest.trim() : "";
   if (!isHex32(digest)) {
-    return NextResponse.json(
-      { error: `"${digest}" is not a 32-byte 0x-prefixed digest.` },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: `"${digest}" is not a 32-byte 0x-prefixed digest.` }, { status: 400 });
   }
 
   const outcome = await verifyAttestation(digest, { topicId: input.topicId });

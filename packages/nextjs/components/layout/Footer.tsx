@@ -16,7 +16,8 @@ export function Footer() {
             Scaffold-HBAR Template
           </div>
           <p className="text-neutral-400 leading-relaxed text-[11px]">
-            Production-grade starter template for Hedera: Pyth Oracle price feeds, HCS consensus attestations, and Mirror Node verification.
+            Production-grade starter template for Hedera: Pyth Oracle price feeds, HCS consensus attestations, and
+            Mirror Node verification.
           </p>
         </div>
 

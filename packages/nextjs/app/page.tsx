@@ -14,7 +14,10 @@ export default async function Home() {
           Oracle-stamped HTS asset registry: Pyth prices, HCS attestation, Mirror Node verification.
         </p>
         <div className="mt-2">
-          <Link className="rounded border border-neutral-700 px-3 py-1.5 text-sm hover:border-neutral-500" href="/verify">
+          <Link
+            className="rounded border border-neutral-700 px-3 py-1.5 text-sm hover:border-neutral-500"
+            href="/verify"
+          >
             Verify attestation →
           </Link>
         </div>

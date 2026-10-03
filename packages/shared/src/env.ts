@@ -271,9 +271,7 @@ export function toBrowserEnvironment(source: EnvironmentSource): Record<string, 
   const forbidden = new Set(SERVER_ONLY_ENV_KEYS);
   const out: Record<string, string> = {};
 
-  for (const [canonical, aliases] of Object.entries(ENV_ALIASES) as Array<
-    [keyof typeof ENV_KEYS, readonly string[]]
-  >) {
+  for (const [canonical, aliases] of Object.entries(ENV_ALIASES) as Array<[keyof typeof ENV_KEYS, readonly string[]]>) {
     if (!safe.has(ENV_KEYS[canonical])) continue;
     const value = [ENV_KEYS[canonical], ...aliases]
       .map((key) => readString(source, key))
@@ -283,9 +281,7 @@ export function toBrowserEnvironment(source: EnvironmentSource): Record<string, 
 
   // Anything not named by an alias, such as the policy bounds, is copied straight across.
   const handled = new Set<string>();
-  for (const [canonical, aliases] of Object.entries(ENV_ALIASES) as Array<
-    [keyof typeof ENV_KEYS, readonly string[]]
-  >) {
+  for (const [canonical, aliases] of Object.entries(ENV_ALIASES) as Array<[keyof typeof ENV_KEYS, readonly string[]]>) {
     handled.add(ENV_KEYS[canonical]);
     for (const alias of aliases) handled.add(alias);
   }

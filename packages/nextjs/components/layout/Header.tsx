@@ -5,15 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { NetworkSelector } from "~~/components/wallet/NetworkSelector";
 import { useWallet } from "~~/hooks/useWallet";
-import {
-  Layers,
-  LayoutDashboard,
-  ShieldCheck,
-  FileCheck2,
-  Menu,
-  X,
-  AlertTriangle,
-} from "lucide-react";
+import { Layers, LayoutDashboard, ShieldCheck, FileCheck2, Menu, X, AlertTriangle } from "lucide-react";
 
 export function Header() {
   const pathname = usePathname();
@@ -35,7 +27,8 @@ export function Header() {
         <div className="bg-amber-500/10 border-b border-amber-500/20 px-4 py-1.5 text-center text-xs text-amber-300 flex items-center justify-center gap-2">
           <AlertTriangle className="h-3.5 w-3.5" />
           <span>
-            <strong>Hedera Mainnet Active:</strong> Actions will expend real HBAR. Verify transaction parameters before signing.
+            <strong>Hedera Mainnet Active:</strong> Actions will expend real HBAR. Verify transaction parameters before
+            signing.
           </span>
         </div>
       )}
@@ -54,9 +47,7 @@ export function Header() {
                   v2.0
                 </span>
               </span>
-              <span className="text-[11px] text-neutral-400 block -mt-0.5">
-                Priced Asset Registry
-              </span>
+              <span className="text-[11px] text-neutral-400 block -mt-0.5">Priced Asset Registry</span>
             </div>
           </Link>
 

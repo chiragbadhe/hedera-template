@@ -117,10 +117,7 @@ export function VerifyForm() {
                 className="w-full rounded-xl border border-neutral-800 bg-neutral-950 pl-9 pr-10 py-2.5 text-xs text-white font-mono placeholder:text-neutral-600 focus:border-indigo-500 focus:outline-none transition"
               />
               {digest && (
-                <button
-                  onClick={handleCopy}
-                  className="absolute right-3 top-2.5 p-1 text-neutral-400 hover:text-white"
-                >
+                <button onClick={handleCopy} className="absolute right-3 top-2.5 p-1 text-neutral-400 hover:text-white">
                   {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
                 </button>
               )}
@@ -201,10 +198,7 @@ export function VerifyForm() {
               </div>
               <div className="space-y-2">
                 {result.checks.map((c, i) => (
-                  <div
-                    key={i}
-                    className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-4 space-y-1.5"
-                  >
+                  <div key={i} className="rounded-xl border border-neutral-800 bg-neutral-900/60 p-4 space-y-1.5">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-medium text-white">{c.label}</span>
                       <span

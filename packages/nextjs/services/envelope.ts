@@ -102,8 +102,7 @@ export async function prepareAttestation(request: AttestationRequest): Promise<R
   if (environment.registryAddress === undefined) {
     return {
       ok: false,
-      error:
-        "No registry is configured. Set NEXT_PUBLIC_REGISTRY_ADDRESS, or run `yarn hardhat:deploy` to deploy one.",
+      error: "No registry is configured. Set NEXT_PUBLIC_REGISTRY_ADDRESS, or run `yarn hardhat:deploy` to deploy one.",
     };
   }
 
@@ -150,7 +149,8 @@ export async function prepareAttestation(request: AttestationRequest): Promise<R
   if (!policy.contractAccepted) {
     return {
       ok: false,
-      error: `The registry would reject this attestation: ${policy.contractRejection ?? policy.contractSelector ?? "policy mismatch"}. ${policy.reason ?? ""}`.trim(),
+      error:
+        `The registry would reject this attestation: ${policy.contractRejection ?? policy.contractSelector ?? "policy mismatch"}. ${policy.reason ?? ""}`.trim(),
     };
   }
 

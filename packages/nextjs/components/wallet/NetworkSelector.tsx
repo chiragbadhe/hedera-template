@@ -62,11 +62,7 @@ export function NetworkSelector() {
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    <span
-                      className={`h-2 w-2 rounded-full ${
-                        config.isTestnet ? "bg-emerald-400" : "bg-indigo-400"
-                      }`}
-                    />
+                    <span className={`h-2 w-2 rounded-full ${config.isTestnet ? "bg-emerald-400" : "bg-indigo-400"}`} />
                     <div>
                       <div className="font-medium">{config.name}</div>
                       <div className="text-[10px] text-neutral-400">Chain ID: {config.chainId}</div>

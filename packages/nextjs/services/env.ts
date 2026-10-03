@@ -15,12 +15,7 @@ import "server-only";
 
 import fs from "fs";
 import path from "path";
-import {
-  resolveEnvironment,
-  toBrowserEnvironment,
-  type HederaNetwork,
-  type ResolvedEnvironment,
-} from "@sh/shared";
+import { resolveEnvironment, toBrowserEnvironment, type HederaNetwork, type ResolvedEnvironment } from "@sh/shared";
 
 function ensureEnvLoaded() {
   const rootDir = path.resolve(process.cwd(), "../../");

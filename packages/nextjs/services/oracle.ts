@@ -106,13 +106,18 @@ export async function readOracleSnapshot(
       args: [feedId as `0x${string}`],
     });
     if (!Array.isArray(words) || words.length !== 4) {
-      throw new Error(`expected the 4-word Pyth observation, received ${Array.isArray(words) ? words.length : typeof words}`);
+      throw new Error(
+        `expected the 4-word Pyth observation, received ${Array.isArray(words) ? words.length : typeof words}`,
+      );
     }
     return decodeOraclePrice(words as unknown as bigint[]);
   });
 
   if (!priceResult.ok) {
-    return { ok: false, error: `Could not read ${feedSymbol(feedId)} from ${address} via ${relayUrl(network)}: ${priceResult.error}` };
+    return {
+      ok: false,
+      error: `Could not read ${feedSymbol(feedId)} from ${address} via ${relayUrl(network)}: ${priceResult.error}`,
+    };
   }
 
   const price = priceResult.value;
@@ -175,8 +180,7 @@ export async function readRegistryPolicy(
   if (!address) {
     return {
       ok: false,
-      error:
-        "No registry is configured. Set NEXT_PUBLIC_REGISTRY_ADDRESS, or run `yarn hardhat:deploy` to deploy one.",
+      error: "No registry is configured. Set NEXT_PUBLIC_REGISTRY_ADDRESS, or run `yarn hardhat:deploy` to deploy one.",
     };
   }
 

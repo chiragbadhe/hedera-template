@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 
-export function usePolling<T>(fn: () => Promise<T>, intervalMs = 10_000, deps: readonly unknown[] = []): {
+export function usePolling<T>(
+  fn: () => Promise<T>,
+  intervalMs = 10_000,
+  deps: readonly unknown[] = [],
+): {
   data: T | null;
   error: string | null;
   loading: boolean;

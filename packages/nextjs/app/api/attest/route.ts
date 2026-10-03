@@ -21,10 +21,7 @@ export async function POST(request: Request) {
     };
 
     if (!assetToken || !units) {
-      return NextResponse.json(
-        { ok: false, error: "Both assetToken and units are required fields." },
-        { status: 400 },
-      );
+      return NextResponse.json({ ok: false, error: "Both assetToken and units are required fields." }, { status: 400 });
     }
 
     // 1. Reserve real HCS transaction ID
@@ -45,10 +42,7 @@ export async function POST(request: Request) {
     });
 
     if (!prepResult.ok) {
-      return NextResponse.json(
-        { ok: false, error: prepResult.error },
-        { status: 400 },
-      );
+      return NextResponse.json({ ok: false, error: prepResult.error }, { status: 400 });
     }
 
     const prepared = prepResult.value;
@@ -111,9 +105,6 @@ export async function POST(request: Request) {
       units: prepared.units.toString(),
     });
   } catch (error) {
-    return NextResponse.json(
-      { ok: false, error: describeError(error) },
-      { status: 500 },
-    );
+    return NextResponse.json({ ok: false, error: describeError(error) }, { status: 500 });
   }
 }

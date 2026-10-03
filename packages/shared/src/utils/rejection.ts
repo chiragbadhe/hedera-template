@@ -47,18 +47,12 @@ function canonicalType(parameter: AbiParameter): string {
 }
 
 /** The canonical signature of an error or function, e.g. `PriceStale(uint64,uint64)`. */
-export function errorSignature(item: {
-  readonly name: string;
-  readonly inputs?: readonly AbiParameter[];
-}): string {
+export function errorSignature(item: { readonly name: string; readonly inputs?: readonly AbiParameter[] }): string {
   return `${item.name}(${(item.inputs ?? []).map(canonicalType).join(",")})`;
 }
 
 /** The 4-byte selector of a Solidity error or function. */
-export function selectorOf(item: {
-  readonly name: string;
-  readonly inputs?: readonly AbiParameter[];
-}): string {
+export function selectorOf(item: { readonly name: string; readonly inputs?: readonly AbiParameter[] }): string {
   const hash = keccak_256(new TextEncoder().encode(errorSignature(item)));
   return bytesToHex(hash).slice(0, 8);
 }

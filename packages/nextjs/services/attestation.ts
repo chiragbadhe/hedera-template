@@ -60,7 +60,12 @@ type OnChainRecord = {
   readonly assetToken: string;
   readonly registrant: string;
   readonly units: bigint;
-  readonly observed: { readonly price: bigint; readonly conf: bigint; readonly expo: number; readonly publishTime: number };
+  readonly observed: {
+    readonly price: bigint;
+    readonly conf: bigint;
+    readonly expo: number;
+    readonly publishTime: number;
+  };
   readonly deviationBps: number;
   readonly priceAgeSeconds: number;
   readonly recordedAt: number;
@@ -450,7 +455,10 @@ async function askContract(observation: ObservationArg, units: string): Promise<
   }
   const feedId = environment.feedId ?? HBAR_USD_FEED_ID;
   if (!isHex32(feedId)) {
-    return { ok: false, error: `No Pyth feed id is configured. Set ${ENV_KEYS.feedId}, or pass one with the attestation.` };
+    return {
+      ok: false,
+      error: `No Pyth feed id is configured. Set ${ENV_KEYS.feedId}, or pass one with the attestation.`,
+    };
   }
 
   let unitsValue: bigint;
@@ -530,11 +538,7 @@ type ContractVerdict = {
  * `attested` is the observation the payload was built from and `units` the base-unit
  * count that would be registered. Never throws.
  */
-export async function checkAttestationPolicy(
-  attested: OraclePrice,
-  units: string,
-): Promise<PolicyVerdict> {
-
+export async function checkAttestationPolicy(attested: OraclePrice, units: string): Promise<PolicyVerdict> {
   let preview: ContractVerdict;
   try {
     preview = await previewLocally(attested, units);
@@ -593,9 +597,7 @@ export async function checkAttestationPolicy(
     // Agreement is only meaningful when both sides reached a verdict about the same
     // condition, so an unrecognised contract selector is a disagreement, not a pass.
     verdictsAgree:
-      contract.value.accepted === preview.accepted && contract.value.rejection === preview.rejection
-        ? true
-        : false,
+      contract.value.accepted === preview.accepted && contract.value.rejection === preview.rejection ? true : false,
     reason:
       contract.value.accepted === preview.accepted && contract.value.rejection === preview.rejection
         ? null

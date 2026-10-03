@@ -1,11 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  EntityIdError,
-  entityIdToEvmAddress,
-  evmAddressToEntityId,
-  parseEntityId,
-  requireEntityId,
-} from "./entities";
+import { EntityIdError, entityIdToEvmAddress, evmAddressToEntityId, parseEntityId, requireEntityId } from "./entities";
 
 describe("parseEntityId", () => {
   it("splits shard, realm and num", () => {

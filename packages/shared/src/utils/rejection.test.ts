@@ -22,8 +22,6 @@ import {
 } from "./rejection";
 import type { RegistryRejectionCode } from "../types/oracle";
 
-
-
 describe("error signatures and selectors", () => {
   it("builds the canonical signature, with no spaces and no argument names", () => {
     expect(errorSignature({ name: "PriceStale", inputs: [{ type: "uint64" }, { type: "uint64" }] })).toBe(
@@ -40,12 +38,7 @@ describe("error signatures and selectors", () => {
     // `checkAttestation(bytes32,int64,int64,int32,uint40)` produce different selectors,
     // and joining the components instead of wrapping them produces a plausible 4-byte
     // value that dispatches to nothing.
-    const observation = [
-      { type: "int64" },
-      { type: "int64" },
-      { type: "int32" },
-      { type: "uint32" },
-    ];
+    const observation = [{ type: "int64" }, { type: "int64" }, { type: "int32" }, { type: "uint32" }];
     const asStruct = errorSignature({
       name: "checkAttestation",
       inputs: [{ type: "bytes32" }, { type: "tuple", components: observation }],
@@ -57,16 +50,21 @@ describe("error signatures and selectors", () => {
 
     expect(asStruct).toBe("checkAttestation(bytes32,(int64,int64,int32,uint32))");
     expect(flattened).toBe("checkAttestation(bytes32,int64,int64,int32,uint32)");
-    expect(selectorOf({ name: "checkAttestation", inputs: [{ type: "bytes32" }, { type: "tuple", components: observation }] })).not.toBe(
-      selectorOf({ name: "checkAttestation", inputs: [{ type: "bytes32" }, ...observation] }),
-    );
+    expect(
+      selectorOf({
+        name: "checkAttestation",
+        inputs: [{ type: "bytes32" }, { type: "tuple", components: observation }],
+      }),
+    ).not.toBe(selectorOf({ name: "checkAttestation", inputs: [{ type: "bytes32" }, ...observation] }));
   });
 
   it("expands nested tuples", () => {
     expect(
       errorSignature({
         name: "outer",
-        inputs: [{ type: "tuple", components: [{ type: "address" }, { type: "tuple", components: [{ type: "uint8" }] }] }],
+        inputs: [
+          { type: "tuple", components: [{ type: "address" }, { type: "tuple", components: [{ type: "uint8" }] }] },
+        ],
       }),
     ).toBe("outer((address,(uint8)))");
   });
@@ -105,9 +103,7 @@ describe("REJECTION_SELECTORS", () => {
 
 describe("explainSelector", () => {
   it("round-trips every code back from its selector", () => {
-    for (const [code, selector] of Object.entries(REJECTION_SELECTORS) as Array<
-      [RegistryRejectionCode, string]
-    >) {
+    for (const [code, selector] of Object.entries(REJECTION_SELECTORS) as Array<[RegistryRejectionCode, string]>) {
       expect(explainSelector(`0x${selector}`)).toBe(code);
       expect(explainSelector(selector)).toBe(code);
     }
@@ -125,7 +121,6 @@ describe("explainSelector", () => {
     expect(explainSelector("0xdeadbeef")).toBeNull();
     expect(errorNameForSelector("0xdeadbeef")).toBeNull();
   });
-
 });
 
 describe("normalizeSelector", () => {

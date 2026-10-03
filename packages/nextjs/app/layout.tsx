@@ -6,7 +6,8 @@ import { Footer } from "~~/components/layout/Footer";
 
 export const metadata: Metadata = {
   title: "Scaffold-HBAR — Priced Asset Registry & Developer Experience",
-  description: "Production-grade Hedera developer starter template with Pyth Oracle price feeds, HCS attestations, server operator signing, and Mirror Node verification.",
+  description:
+    "Production-grade Hedera developer starter template with Pyth Oracle price feeds, HCS attestations, server operator signing, and Mirror Node verification.",
   keywords: ["Hedera", "HBAR", "Pyth Oracle", "HCS", "HTS", "Next.js", "Web3", "Scaffold-HBAR"],
 };
 

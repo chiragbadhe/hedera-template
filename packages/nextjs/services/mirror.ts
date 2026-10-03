@@ -202,9 +202,7 @@ export async function readContractId(
   network: HederaNetwork = serverEnvironment().network,
 ): Promise<Result<string>> {
   const result = await attempt(() =>
-    fetchJson<{ contract_id?: string }>(
-      `${mirrorNodeUrl(network)}/api/v1/contracts/${encodeURIComponent(address)}`,
-    ),
+    fetchJson<{ contract_id?: string }>(`${mirrorNodeUrl(network)}/api/v1/contracts/${encodeURIComponent(address)}`),
   );
 
   if (!result.ok) {

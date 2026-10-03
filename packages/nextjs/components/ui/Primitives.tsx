@@ -1,15 +1,7 @@
 import type { ReactNode } from "react";
 import { classNames } from "~~/utils/cn";
 
-export function Card({
-  title,
-  children,
-  action,
-}: {
-  title: string;
-  children: ReactNode;
-  action?: ReactNode;
-}) {
+export function Card({ title, children, action }: { title: string; children: ReactNode; action?: ReactNode }) {
   return (
     <section className="rounded-lg border border-neutral-800 bg-neutral-950/40 p-4 shadow-sm">
       <header className="mb-3 flex items-center justify-between">

@@ -28,7 +28,15 @@
 
 import "server-only";
 
-import { Client, Hbar, PrivateKey, Status, TopicId, TopicMessageSubmitTransaction, TransactionId } from "@hiero-ledger/sdk";
+import {
+  Client,
+  Hbar,
+  PrivateKey,
+  Status,
+  TopicId,
+  TopicMessageSubmitTransaction,
+  TransactionId,
+} from "@hiero-ledger/sdk";
 import { ENV_KEYS, hashscanUrl, type HederaNetwork } from "@sh/shared";
 import { describeError, type Result } from "./chains";
 import { operatorEnvironment, serverEnvironment } from "./env";
@@ -218,7 +226,8 @@ async function resolveConsensusTimestamp(transactionId: string): Promise<{
   if (result.value === null) {
     return {
       timestamp: null,
-      warning: "Published, but the Mirror Node has not indexed this transaction yet; the consensus timestamp is pending.",
+      warning:
+        "Published, but the Mirror Node has not indexed this transaction yet; the consensus timestamp is pending.",
     };
   }
   if (result.value.status !== "SUCCESS") {

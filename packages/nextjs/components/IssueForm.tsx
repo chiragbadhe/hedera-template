@@ -128,7 +128,8 @@ export function IssueForm() {
           <div>
             <h1 className="text-xl font-bold text-white">Issue &amp; Stamp Asset Record</h1>
             <p className="text-xs text-neutral-400">
-              Stamp an HTS token reference with Pyth oracle pricing, publish to HCS &amp; record in the smart contract registry
+              Stamp an HTS token reference with Pyth oracle pricing, publish to HCS &amp; record in the smart contract
+              registry
             </p>
           </div>
         </div>
@@ -143,9 +144,7 @@ export function IssueForm() {
                 <span className="text-emerald-300 font-mono font-bold">${oracle.data.value.priceUsd} USD</span>
               </div>
             </div>
-            <span className="text-[11px] text-neutral-400">
-              Age: {oracle.data.value.freshness.ageSeconds}s
-            </span>
+            <span className="text-[11px] text-neutral-400">Age: {oracle.data.value.freshness.ageSeconds}s</span>
           </div>
         )}
 
@@ -192,11 +191,11 @@ export function IssueForm() {
               <Key className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
               <div className="space-y-0.5">
                 <div className="font-semibold text-white">
-                  Operator Account ID:{" "}
-                  <span className="font-mono text-emerald-300">{operatorAccountId}</span>
+                  Operator Account ID: <span className="font-mono text-emerald-300">{operatorAccountId}</span>
                 </div>
                 <p className="text-[11px] text-neutral-400 leading-relaxed">
-                  Attestation payload and contract write will be signed automatically by the server operator on Hedera {activeNetwork}. Secret credentials remain strictly on the server.
+                  Attestation payload and contract write will be signed automatically by the server operator on Hedera{" "}
+                  {activeNetwork}. Secret credentials remain strictly on the server.
                 </p>
               </div>
             </div>
@@ -350,36 +349,45 @@ export function IssueForm() {
                       )}
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-[11px] font-mono text-neutral-300 bg-neutral-900/50 p-2 rounded-lg border border-neutral-800">
-                      <div><span className="text-neutral-500">Topic ID:</span> {txResult.hcs.topicId}</div>
-                      <div><span className="text-neutral-500">Sequence #:</span> {txResult.hcs.sequenceNumber ?? "Pending"}</div>
-                      <div className="col-span-2 truncate"><span className="text-neutral-500">Tx ID:</span> {txResult.hcs.transactionId}</div>
+                      <div>
+                        <span className="text-neutral-500">Topic ID:</span> {txResult.hcs.topicId}
+                      </div>
+                      <div>
+                        <span className="text-neutral-500">Sequence #:</span> {txResult.hcs.sequenceNumber ?? "Pending"}
+                      </div>
+                      <div className="col-span-2 truncate">
+                        <span className="text-neutral-500">Tx ID:</span> {txResult.hcs.transactionId}
+                      </div>
                       {txResult.hcs.consensusTimestamp && (
-                        <div className="col-span-2"><span className="text-neutral-500">Consensus:</span> {txResult.hcs.consensusTimestamp}</div>
+                        <div className="col-span-2">
+                          <span className="text-neutral-500">Consensus:</span> {txResult.hcs.consensusTimestamp}
+                        </div>
                       )}
                     </div>
                   </div>
                 )}
 
                 {/* Registry Contract Details */}
-                {txResult.contractTxHash && txResult.contractTxHash !== "0x0000000000000000000000000000000000000000000000000000000000000000" && (
-                  <div className="space-y-1 pt-1 border-t border-emerald-500/20">
-                    <div className="text-[11px] font-semibold text-emerald-300 flex items-center justify-between">
-                      <span>Registry Contract Write:</span>
-                      <a
-                        href={`${targetNetworkConfig.explorerUrl}/transaction/${txResult.contractTxHash}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[11px] font-medium text-indigo-300 hover:text-white transition"
-                      >
-                        View EVM Tx on HashScan
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
+                {txResult.contractTxHash &&
+                  txResult.contractTxHash !== "0x0000000000000000000000000000000000000000000000000000000000000000" && (
+                    <div className="space-y-1 pt-1 border-t border-emerald-500/20">
+                      <div className="text-[11px] font-semibold text-emerald-300 flex items-center justify-between">
+                        <span>Registry Contract Write:</span>
+                        <a
+                          href={`${targetNetworkConfig.explorerUrl}/transaction/${txResult.contractTxHash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] font-medium text-indigo-300 hover:text-white transition"
+                        >
+                          View EVM Tx on HashScan
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                      <div className="font-mono text-white text-[11px] bg-neutral-900/50 p-2 rounded-lg break-all border border-neutral-800">
+                        {txResult.contractTxHash}
+                      </div>
                     </div>
-                    <div className="font-mono text-white text-[11px] bg-neutral-900/50 p-2 rounded-lg break-all border border-neutral-800">
-                      {txResult.contractTxHash}
-                    </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Verification CTA button */}
                 {txResult.digest && (

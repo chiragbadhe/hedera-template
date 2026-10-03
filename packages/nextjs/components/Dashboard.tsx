@@ -89,7 +89,9 @@ export function Dashboard() {
               Priced Asset Registry on Hedera
             </h1>
             <p className="text-sm text-neutral-300 leading-relaxed">
-              Read Pyth observations, compute attestation digests under shared policy rules, and verify envelopes against Mirror Node and the on-chain registry. See docs for the current status of HCS publish and recordIssuance.
+              Read Pyth observations, compute attestation digests under shared policy rules, and verify envelopes
+              against Mirror Node and the on-chain registry. See docs for the current status of HCS publish and
+              recordIssuance.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
@@ -157,9 +159,7 @@ export function Dashboard() {
 
                 <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4">
                   <div className="text-xs text-neutral-400 mb-1">Price (USD)</div>
-                  <div className="text-lg font-bold text-emerald-400 font-mono">
-                    ${oracle.data.value.priceUsd}
-                  </div>
+                  <div className="text-lg font-bold text-emerald-400 font-mono">${oracle.data.value.priceUsd}</div>
                 </div>
               </div>
 
@@ -188,7 +188,9 @@ export function Dashboard() {
               <div className="space-y-1.5">
                 <div className="flex justify-between text-[11px] text-neutral-400">
                   <span>Price Age Bound Utilization</span>
-                  <span>{oracle.data.value.freshness.ageSeconds}s / {oracle.data.value.freshness.maxAgeSeconds}s</span>
+                  <span>
+                    {oracle.data.value.freshness.ageSeconds}s / {oracle.data.value.freshness.maxAgeSeconds}s
+                  </span>
                 </div>
                 <div className="h-2 w-full rounded-full bg-neutral-800 overflow-hidden">
                   <div
@@ -254,9 +256,7 @@ export function Dashboard() {
 
                 <div className="rounded-xl border border-neutral-800 bg-neutral-950/60 p-4">
                   <div className="text-xs text-neutral-400 mb-1">Total Recorded Assets</div>
-                  <div className="text-lg font-bold text-white font-mono">
-                    {registry.data.policy.recordCount}
-                  </div>
+                  <div className="text-lg font-bold text-white font-mono">{registry.data.policy.recordCount}</div>
                 </div>
               </div>
 
@@ -264,7 +264,8 @@ export function Dashboard() {
                 <div className="rounded-xl border border-neutral-800/80 bg-neutral-950/40 p-3 space-y-1">
                   <div className="text-neutral-400">Max Deviation Bound</div>
                   <div className="font-semibold text-white font-mono">
-                    {registry.data.policy.maxDeviationBps} BPS ({(registry.data.policy.maxDeviationBps / 100).toFixed(2)}%)
+                    {registry.data.policy.maxDeviationBps} BPS (
+                    {(registry.data.policy.maxDeviationBps / 100).toFixed(2)}%)
                   </div>
                 </div>
 
@@ -312,7 +313,9 @@ export function Dashboard() {
             <Database className="mx-auto h-8 w-8 text-neutral-600" />
             <div className="text-sm font-medium text-neutral-300">No Asset Records Found</div>
             <p className="text-xs text-neutral-500 max-w-sm mx-auto">
-              {searchTerm ? "No records match your search criteria." : "No assets have been recorded in the registry contract yet."}
+              {searchTerm
+                ? "No records match your search criteria."
+                : "No assets have been recorded in the registry contract yet."}
             </p>
             <Link
               href="/issue"
