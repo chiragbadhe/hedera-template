@@ -4,10 +4,10 @@ import { useState, useRef, useEffect } from "react";
 import { useWallet } from "~~/hooks/useWallet";
 import { HEDERA_NETWORKS, type NetworkConfig } from "~~/lib/networks";
 import type { HederaNetwork } from "@sh/shared";
-import { Globe, AlertTriangle, ChevronDown, Check } from "lucide-react";
+import { Globe, ChevronDown, Check } from "lucide-react";
 
 export function NetworkSelector() {
-  const { activeNetwork, switchWalletNetwork, networkMismatch, targetNetworkConfig, walletType } = useWallet();
+  const { activeNetwork, switchWalletNetwork, targetNetworkConfig } = useWallet();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -31,24 +31,13 @@ export function NetworkSelector() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-medium transition-all ${
-          networkMismatch
-            ? "border-amber-500/50 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20"
-            : targetNetworkConfig.isTestnet
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
-              : "border-indigo-500/30 bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20"
+          targetNetworkConfig.isTestnet
+            ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
+            : "border-indigo-500/30 bg-indigo-500/10 text-indigo-300 hover:bg-indigo-500/20"
         }`}
       >
-        {networkMismatch ? (
-          <AlertTriangle className="h-3.5 w-3.5 text-amber-400 animate-pulse" />
-        ) : (
-          <Globe className="h-3.5 w-3.5 opacity-80" />
-        )}
+        <Globe className="h-3.5 w-3.5 opacity-80" />
         <span>{targetNetworkConfig.name}</span>
-        {networkMismatch && (
-          <span className="rounded bg-amber-500/20 px-1 py-0.5 text-[10px] uppercase tracking-wider text-amber-300">
-            Wrong Net
-          </span>
-        )}
         <ChevronDown className="h-3 w-3 opacity-60" />
       </button>
 
@@ -88,17 +77,6 @@ export function NetworkSelector() {
               );
             })}
           </div>
-
-          {networkMismatch && walletType === "reown-evm" && (
-            <div className="mt-2 border-t border-neutral-800 pt-2 px-1">
-              <button
-                onClick={() => handleSelect(activeNetwork)}
-                className="w-full rounded-lg bg-amber-500/20 px-2 py-1.5 text-center text-xs font-semibold text-amber-300 hover:bg-amber-500/30 transition"
-              >
-                Switch Wallet to {targetNetworkConfig.name}
-              </button>
-            </div>
-          )}
         </div>
       )}
     </div>

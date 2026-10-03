@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { NetworkSelector } from "~~/components/wallet/NetworkSelector";
-import { WalletButton } from "~~/components/wallet/WalletButton";
 import { useWallet } from "~~/hooks/useWallet";
 import {
   Layers,
@@ -18,7 +17,7 @@ import {
 
 export function Header() {
   const pathname = usePathname();
-  const { activeNetwork, networkMismatch } = useWallet();
+  const { activeNetwork } = useWallet();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
@@ -37,16 +36,6 @@ export function Header() {
           <AlertTriangle className="h-3.5 w-3.5" />
           <span>
             <strong>Hedera Mainnet Active:</strong> Actions will expend real HBAR. Verify transaction parameters before signing.
-          </span>
-        </div>
-      )}
-
-      {/* Network Mismatch Banner */}
-      {networkMismatch && (
-        <div className="bg-red-500/10 border-b border-red-500/20 px-4 py-1.5 text-center text-xs text-red-300 flex items-center justify-center gap-2">
-          <AlertTriangle className="h-3.5 w-3.5 text-red-400" />
-          <span>
-            <strong>Network Mismatch:</strong> Your wallet chain does not match the active application network ({activeNetwork}). Switch network in wallet control.
           </span>
         </div>
       )}
@@ -80,10 +69,11 @@ export function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all ${isActive
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all ${
+                    isActive
                       ? "bg-neutral-800 text-white font-semibold shadow-inner"
                       : "text-neutral-400 hover:bg-neutral-900 hover:text-white"
-                    }`}
+                  }`}
                 >
                   <Icon className={`h-4 w-4 ${isActive ? "text-indigo-400" : "text-neutral-400"}`} />
                   <span>{item.label}</span>
@@ -93,10 +83,9 @@ export function Header() {
           </nav>
         </div>
 
-        {/* Right Controls: Network Selector & Wallet Button */}
+        {/* Right Controls: Network Selector */}
         <div className="hidden md:flex items-center gap-3">
           <NetworkSelector />
-          <WalletButton />
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -123,8 +112,9 @@ export function Header() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${isActive ? "bg-neutral-800 text-white" : "text-neutral-400 hover:bg-neutral-900 hover:text-white"
-                    }`}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${
+                    isActive ? "bg-neutral-800 text-white" : "text-neutral-400 hover:bg-neutral-900 hover:text-white"
+                  }`}
                 >
                   <Icon className="h-4 w-4 text-indigo-400" />
                   <span>{item.label}</span>
@@ -132,9 +122,6 @@ export function Header() {
               );
             })}
           </nav>
-          <div className="pt-2 border-t border-neutral-800 flex justify-center">
-            <WalletButton />
-          </div>
         </div>
       )}
     </header>

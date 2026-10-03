@@ -66,13 +66,13 @@ export function Footer() {
             </li>
             <li>
               <a
-                href="https://docs.reown.com"
+                href="https://docs.pyth.network"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-white flex items-center gap-1 transition"
               >
                 <ExternalLink className="h-3 w-3 text-neutral-500" />
-                Reown AppKit Docs
+                Pyth Network Docs
               </a>
             </li>
           </ul>
