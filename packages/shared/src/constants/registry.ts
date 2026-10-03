@@ -60,8 +60,6 @@ export const ENV_KEYS = {
   maxPriceAgeSeconds: "REGISTRY_MAX_PRICE_AGE_SECONDS",
   /** Optional: contract deviation policy, basis points. */
   maxDeviationBps: "REGISTRY_MAX_DEVIATION_BPS",
-  /** Optional: WalletConnect project id used by the wallet modal. */
-  walletConnectProjectId: "NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID",
 } as const;
 
 export type EnvKey = (typeof ENV_KEYS)[keyof typeof ENV_KEYS];
@@ -88,7 +86,6 @@ export const ENV_ALIASES: Readonly<Record<keyof typeof ENV_KEYS, readonly string
   feedId: [],
   maxPriceAgeSeconds: [],
   maxDeviationBps: [],
-  walletConnectProjectId: [],
 } satisfies Readonly<Record<keyof typeof ENV_KEYS, readonly string[]>>;
 
 /**
@@ -113,7 +110,6 @@ export const BROWSER_SAFE_ENV_KEYS: readonly string[] = [
   ENV_KEYS.feedId,
   ENV_KEYS.maxPriceAgeSeconds,
   ENV_KEYS.maxDeviationBps,
-  ENV_KEYS.walletConnectProjectId,
   ...ENV_ALIASES.jsonRpcUrl,
 ];
 

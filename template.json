@@ -58,11 +58,7 @@
         }
       ]
     },
-    "rename": {
-      "packages/shared": "packages/shared",
-      "packages/hardhat": "packages/hardhat",
-      "packages/nextjs": "packages/nextjs"
-    },
+    "rename": {},
     "env": {
       "defaults": {
         "HEDERA_NETWORK": "testnet",
@@ -82,9 +78,7 @@
         "NEXT_PUBLIC_ORACLE_FEED_ID",
         "NEXT_PUBLIC_REGISTRY_ADDRESS",
         "NEXT_PUBLIC_REGISTRY_CONTRACT_ID",
-        "HEDERA_ATTESTATION_TOPIC_ID",
-        "NEXT_PUBLIC_REOWN_PROJECT_ID",
-        "NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID"
+        "HEDERA_ATTESTATION_TOPIC_ID"
       ]
     }
   }

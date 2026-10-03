@@ -121,7 +121,6 @@ describe("toBrowserEnvironment", () => {
       [ENV_KEYS.network]: "testnet",
       [ENV_KEYS.registryAddress]: "0xabc",
       SOME_SECRET: "hunter2",
-      [ENV_KEYS.walletConnectProjectId]: "abc123",
     });
 
     expect(exposed).not.toHaveProperty(ENV_KEYS.operatorAccountId);
@@ -129,7 +128,6 @@ describe("toBrowserEnvironment", () => {
     expect(exposed).not.toHaveProperty("SOME_SECRET");
     expect(exposed).toHaveProperty(ENV_KEYS.network, "testnet");
     expect(exposed).toHaveProperty(ENV_KEYS.registryAddress, "0xabc");
-    expect(exposed).toHaveProperty(ENV_KEYS.walletConnectProjectId, "abc123");
   });
 
   it("drops empty values so they do not become empty-string client config", () => {
