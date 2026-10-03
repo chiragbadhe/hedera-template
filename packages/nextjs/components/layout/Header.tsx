@@ -11,7 +11,6 @@ import {
   LayoutDashboard,
   ShieldCheck,
   FileCheck2,
-  BookOpen,
   Menu,
   X,
   AlertTriangle,
@@ -26,7 +25,6 @@ export function Header() {
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
     { href: "/issue", label: "Issue Asset", icon: ShieldCheck },
     { href: "/verify", label: "Verify Digest", icon: FileCheck2 },
-    { href: "/docs", label: "Documentation", icon: BookOpen },
   ];
 
   const isMainnet = activeNetwork === "mainnet";
@@ -82,11 +80,10 @@ export function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all ${
-                    isActive
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all ${isActive
                       ? "bg-neutral-800 text-white font-semibold shadow-inner"
                       : "text-neutral-400 hover:bg-neutral-900 hover:text-white"
-                  }`}
+                    }`}
                 >
                   <Icon className={`h-4 w-4 ${isActive ? "text-indigo-400" : "text-neutral-400"}`} />
                   <span>{item.label}</span>
@@ -126,9 +123,8 @@ export function Header() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${
-                    isActive ? "bg-neutral-800 text-white" : "text-neutral-400 hover:bg-neutral-900 hover:text-white"
-                  }`}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${isActive ? "bg-neutral-800 text-white" : "text-neutral-400 hover:bg-neutral-900 hover:text-white"
+                    }`}
                 >
                   <Icon className="h-4 w-4 text-indigo-400" />
                   <span>{item.label}</span>

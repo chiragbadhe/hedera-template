@@ -56,7 +56,7 @@ export function IssueForm() {
   const { isConnected, address, walletType, targetNetworkConfig, activeNetwork } = useWallet();
   const oracle = usePolling(() => apiFetch<OracleRes>("/api/oracle"), 10_000);
 
-  const [assetToken, setAssetToken] = useState("0.0.10840780");
+  const [assetToken, setAssetToken] = useState("0.0.10836302");
   const [units, setUnits] = useState("1000");
   const [signingMethod, setSigningMethod] = useState<"wallet" | "operator">("operator");
 
@@ -177,17 +177,16 @@ export function IssueForm() {
           </div>
 
           {/* Form Field 3: Signing Method */}
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <label className="text-xs font-semibold text-neutral-300">Signing Mode</label>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => setSigningMethod("operator")}
-                className={`flex items-center gap-3 rounded-xl border p-3 text-left transition ${
-                  signingMethod === "operator"
+                className={`flex items-center gap-3 rounded-xl border p-3 text-left transition ${signingMethod === "operator"
                     ? "border-indigo-500 bg-indigo-500/10 text-white"
                     : "border-neutral-800 bg-neutral-950/60 text-neutral-400 hover:border-neutral-700"
-                }`}
+                  }`}
               >
                 <Key className="h-4 w-4 text-emerald-400 shrink-0" />
                 <div>
@@ -199,11 +198,10 @@ export function IssueForm() {
               <button
                 type="button"
                 onClick={() => setSigningMethod("wallet")}
-                className={`flex items-center gap-3 rounded-xl border p-3 text-left transition ${
-                  signingMethod === "wallet"
+                className={`flex items-center gap-3 rounded-xl border p-3 text-left transition ${signingMethod === "wallet"
                     ? "border-indigo-500 bg-indigo-500/10 text-white"
                     : "border-neutral-800 bg-neutral-950/60 text-neutral-400 hover:border-neutral-700"
-                }`}
+                  }`}
               >
                 <Wallet className="h-4 w-4 text-indigo-400 shrink-0" />
                 <div>
@@ -214,7 +212,7 @@ export function IssueForm() {
                 </div>
               </button>
             </div>
-          </div>
+          </div> */}
 
           {/* Submit Button */}
           <button
@@ -247,13 +245,12 @@ export function IssueForm() {
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-xs">
                 <span
-                  className={`h-2.5 w-2.5 rounded-full ${
-                    txStep === "evaluating"
+                  className={`h-2.5 w-2.5 rounded-full ${txStep === "evaluating"
                       ? "bg-indigo-400 animate-ping"
                       : txStep === "publishing_hcs" || txStep === "recording_contract" || txStep === "confirmed"
                         ? "bg-emerald-400"
                         : "bg-neutral-600"
-                  }`}
+                    }`}
                 />
                 <span className={txStep === "evaluating" ? "text-white font-medium" : "text-neutral-400"}>
                   1. Evaluating attestation policy &amp; computing keccak256 digest
@@ -262,13 +259,12 @@ export function IssueForm() {
 
               <div className="flex items-center gap-3 text-xs">
                 <span
-                  className={`h-2.5 w-2.5 rounded-full ${
-                    txStep === "publishing_hcs"
+                  className={`h-2.5 w-2.5 rounded-full ${txStep === "publishing_hcs"
                       ? "bg-indigo-400 animate-ping"
                       : txStep === "recording_contract" || txStep === "confirmed" || (txResult && txResult.hcs)
                         ? "bg-emerald-400"
                         : "bg-neutral-600"
-                  }`}
+                    }`}
                 />
                 <span
                   className={
@@ -286,15 +282,14 @@ export function IssueForm() {
 
               <div className="flex items-center gap-3 text-xs">
                 <span
-                  className={`h-2.5 w-2.5 rounded-full ${
-                    txStep === "recording_contract"
+                  className={`h-2.5 w-2.5 rounded-full ${txStep === "recording_contract"
                       ? "bg-indigo-400 animate-ping"
                       : txStep === "confirmed"
                         ? "bg-emerald-400"
                         : txStep === "failed" && !txResult?.contractTxHash
                           ? "bg-red-500"
                           : "bg-neutral-600"
-                  }`}
+                    }`}
                 />
                 <span className={txStep === "confirmed" ? "text-emerald-400 font-medium" : "text-neutral-400"}>
                   3. Recording attestation digest in smart contract registry
