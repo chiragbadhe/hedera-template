@@ -29,7 +29,7 @@ export const DOCS_ARTICLES: DocArticle[] = [
 
 Full guide: repository \`docs/getting-started.md\`.
 
-**Note:** \`POST /api/attest\` currently returns a mock transaction hash after oracle + policy + digest. It does not yet publish HCS or call \`recordIssuance\`.
+**Note:** \`POST /api/attest\` publishes the canonical attestation envelope to HCS and records the keccak256 digest in the \`PricedAssetRegistry\` smart contract on-chain.
 `,
   },
   {

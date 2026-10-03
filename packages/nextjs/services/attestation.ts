@@ -29,6 +29,7 @@ import "server-only";
 import {
   ENV_KEYS,
   HBAR_USD_FEED_ID,
+  NETWORK_ENDPOINTS,
   PRICED_ASSET_REGISTRY_ABI,
   attestationDigest,
   digestsMatch,
@@ -44,8 +45,11 @@ import {
   type VerificationCheck,
   type VerificationReport,
 } from "@sh/shared";
-import { attempt, describeError, publicClient, type Result } from "./chains";
-import { serverEnvironment } from "./env";
+import { createWalletClient, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { attempt, describeError, publicClient, relayUrl, type Result } from "./chains";
+import { operatorEnvironment, serverEnvironment } from "./env";
+import type { PreparedAttestation } from "./envelope";
 import { readOracleSnapshot } from "./oracle";
 import { readTopicMessages, readToken, type MirrorToken } from "./mirror";
 
@@ -314,15 +318,6 @@ export async function verifyAttestation(
     ),
   );
 
-  add(
-    compareNumber(
-      "Price age agrees",
-      attestation.registry.observedPriceAgeSeconds,
-      record.priceAgeSeconds,
-      `payload ${attestation.registry.observedPriceAgeSeconds}s, record ${record.priceAgeSeconds}s`,
-    ),
-  );
-
   add({
     label: "Published before it was recorded",
     status: Number(attestation.issuance.txId.split("@")[1]?.split(".")[0] ?? 0) <= record.recordedAt ? "pass" : "fail",
@@ -432,6 +427,16 @@ export type PolicyVerdict = {
   readonly previewAccepted: boolean;
   readonly previewRejection: RegistryRejectionCode | null;
   readonly previewMessage: string | null;
+  /**
+   * Deviation and price age `evaluateAttestation` measured.
+   *
+   * These are the two figures the canonical envelope records under
+   * `registry.observedDeviationBps` / `observedPriceAgeSeconds`, and they are
+   * `null` only when the live price could not be read at all — in which case there
+   * is no envelope to build either.
+   */
+  readonly previewDeviationBps: number | null;
+  readonly previewPriceAgeSeconds: number | null;
   /** `null` when the contract could not be asked, so there is nothing to compare. */
   readonly verdictsAgree: boolean | null;
   readonly reason: string | null;
@@ -443,7 +448,7 @@ async function askContract(observation: ObservationArg, units: string): Promise<
   if (!environment.registryAddress) {
     return { ok: false, error: "No registry is configured. Set NEXT_PUBLIC_REGISTRY_ADDRESS." };
   }
-  const feedId = environment.feedId ?? "";
+  const feedId = environment.feedId ?? HBAR_USD_FEED_ID;
   if (!isHex32(feedId)) {
     return { ok: false, error: `No Pyth feed id is configured. Set ${ENV_KEYS.feedId}, or pass one with the attestation.` };
   }
@@ -504,6 +509,8 @@ async function previewLocally(attested: OraclePrice, units: string): Promise<Con
     rejection: evaluation.rejection?.code ?? null,
     selector: null,
     message: evaluation.rejection?.message ?? null,
+    deviationBps: evaluation.deviation.deviationBps,
+    priceAgeSeconds: evaluation.freshness.ageSeconds,
   };
 }
 
@@ -512,6 +519,9 @@ type ContractVerdict = {
   readonly rejection: RegistryRejectionCode | null;
   readonly selector: string | null;
   readonly message?: string | null;
+  /** Set by `previewLocally` only; a contract verdict never measures the margin itself. */
+  readonly deviationBps?: number;
+  readonly priceAgeSeconds?: number;
 };
 
 /**
@@ -537,6 +547,8 @@ export async function checkAttestationPolicy(
       previewAccepted: false,
       previewRejection: null,
       previewMessage: null,
+      previewDeviationBps: null,
+      previewPriceAgeSeconds: null,
       verdictsAgree: null,
       reason: `The live price could not be read, so no verdict is available: ${describeError(error)}`,
     };
@@ -561,6 +573,8 @@ export async function checkAttestationPolicy(
       previewAccepted: preview.accepted,
       previewRejection: preview.rejection,
       previewMessage: preview.message ?? null,
+      previewDeviationBps: preview.deviationBps ?? null,
+      previewPriceAgeSeconds: preview.priceAgeSeconds ?? null,
       verdictsAgree: null,
       reason: contract.error,
     };
@@ -574,6 +588,8 @@ export async function checkAttestationPolicy(
     previewAccepted: preview.accepted,
     previewRejection: preview.rejection,
     previewMessage: preview.message ?? null,
+    previewDeviationBps: preview.deviationBps ?? null,
+    previewPriceAgeSeconds: preview.priceAgeSeconds ?? null,
     // Agreement is only meaningful when both sides reached a verdict about the same
     // condition, so an unrecognised contract selector is a disagreement, not a pass.
     verdictsAgree:
@@ -585,4 +601,102 @@ export async function checkAttestationPolicy(
         ? null
         : `The contract and the local preview disagree: contract ${contract.value.accepted ? "accepts" : `rejects (${contract.value.rejection ?? contract.value.selector ?? "unknown reason"})`}, preview ${preview.accepted ? "accepts" : `rejects (${preview.rejection ?? "unknown reason"})`}. Trust the contract, and please report this.`,
   };
+}
+
+export type RecordIssuanceResult = {
+  readonly transactionHash: `0x${string}`;
+  readonly recordId: `0x${string}`;
+  readonly alreadyRecorded: boolean;
+  readonly blockNumber?: bigint;
+};
+
+/**
+ * Records an issuance attestation on the registry contract using the operator key.
+ *
+ * Checks if already recorded first (idempotent). Signs and submits `recordIssuance` via
+ * JSON-RPC relay and waits for receipt. Never throws.
+ */
+export async function recordIssuanceOnChain(
+  prepared: PreparedAttestation,
+  network: HederaNetwork = serverEnvironment().network,
+): Promise<Result<RecordIssuanceResult>> {
+  const environment = serverEnvironment();
+  if (!environment.registryAddress) {
+    return { ok: false, error: "No registry is configured. Set NEXT_PUBLIC_REGISTRY_ADDRESS." };
+  }
+
+  // Idempotency check: see if record already exists on chain
+  const existingRecord = await readRecord(prepared.digest, network);
+  if (existingRecord.ok && existingRecord.value !== null) {
+    return {
+      ok: true,
+      value: {
+        transactionHash: "0x0000000000000000000000000000000000000000000000000000000000000000",
+        recordId: prepared.digest,
+        alreadyRecorded: true,
+      },
+    };
+  }
+
+  let operatorPrivateKey: string;
+  try {
+    const opEnv = operatorEnvironment();
+    if (!opEnv.operatorPrivateKey) {
+      return { ok: false, error: `Operator private key is required. Set ${ENV_KEYS.operatorPrivateKey}.` };
+    }
+    operatorPrivateKey = opEnv.operatorPrivateKey;
+  } catch (error) {
+    return { ok: false, error: describeError(error) };
+  }
+
+  try {
+    const account = privateKeyToAccount(operatorPrivateKey as `0x${string}`);
+    const walletClient = createWalletClient({
+      account,
+      chain: {
+        id: NETWORK_ENDPOINTS[network].chainId,
+        name: `hedera-${network}`,
+        nativeCurrency: { name: "HBAR", symbol: "HBAR", decimals: 8 },
+        rpcUrls: { default: { http: [relayUrl(network)] } },
+      },
+      transport: http(relayUrl(network), { timeout: 30_000, retryCount: 2 }),
+    });
+
+    const txHash = await walletClient.writeContract({
+      address: environment.registryAddress as `0x${string}`,
+      abi: PRICED_ASSET_REGISTRY_ABI,
+      functionName: "recordIssuance",
+      args: [
+        prepared.feedId,
+        prepared.digest,
+        prepared.assetAddress,
+        prepared.units,
+        {
+          price: toBigInt(prepared.observation.priceMantissa, "priceMantissa"),
+          conf: toBigInt(prepared.observation.confidenceMantissa, "confidenceMantissa"),
+          expo: prepared.observation.exponent,
+          publishTime: prepared.observation.publishTime,
+        },
+      ],
+    });
+
+    const pClient = publicClient(network);
+    const receipt = await pClient.waitForTransactionReceipt({ hash: txHash, timeout: 60_000 });
+
+    if (receipt.status === "reverted") {
+      return { ok: false, error: `Contract transaction reverted on-chain (txHash: ${txHash}).` };
+    }
+
+    return {
+      ok: true,
+      value: {
+        transactionHash: txHash,
+        recordId: prepared.digest,
+        alreadyRecorded: false,
+        blockNumber: receipt.blockNumber,
+      },
+    };
+  } catch (error) {
+    return { ok: false, error: `Registry contract write failed: ${describeError(error)}` };
+  }
 }

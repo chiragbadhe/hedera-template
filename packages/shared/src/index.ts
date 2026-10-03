@@ -25,6 +25,7 @@ export * from "./schemas/issuance";
 
 export * from "./utils/attestation";
 export * from "./utils/decimal";
+export * from "./utils/entities";
 export * from "./utils/explorer";
 export * from "./utils/format";
 export * from "./utils/oraclePolicy";

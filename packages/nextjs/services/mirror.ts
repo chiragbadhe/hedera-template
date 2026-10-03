@@ -168,18 +168,57 @@ export async function readToken(
   }
 
   const token = result.value;
+  const rawDecimals = Number(token.decimals ?? 0);
+  const decimals = Number.isFinite(rawDecimals) ? rawDecimals : 0;
+
   return {
     ok: true,
     value: {
       tokenId: token.token_id,
       name: token.name ?? "",
       symbol: token.symbol ?? "",
-      decimals: token.decimals ?? 0,
+      decimals,
       totalSupply: String(token.total_supply ?? "0"),
       treasuryAccountId: token.treasury_account_id ?? "",
       evmAddress: token.evm_address ?? null,
     },
   };
+}
+
+/**
+ * Resolves a contract's `0.0.x` id from its `0x` address.
+ *
+ * The canonical envelope carries both renderings, because the registry stores the
+ * address form while the rest of the Hedera ecosystem — links, explorers, HCS
+ * transactions — refers to entities by id. `NEXT_PUBLIC_REGISTRY_CONTRACT_ID` is
+ * the cheap answer; this is the fallback for a deployment where it was not set.
+ *
+ * Returns an error rather than `null`: an attestation envelope cannot be built
+ * without a contract id, so an unresolvable address is fatal to the write path
+ * while remaining irrelevant to the dashboard.
+ */
+export async function readContractId(
+  address: string,
+  network: HederaNetwork = serverEnvironment().network,
+): Promise<Result<string>> {
+  const result = await attempt(() =>
+    fetchJson<{ contract_id?: string }>(
+      `${mirrorNodeUrl(network)}/api/v1/contracts/${encodeURIComponent(address)}`,
+    ),
+  );
+
+  if (!result.ok) {
+    if (/responded 404/.test(result.error)) {
+      return { ok: false, error: `Mirror Node has no contract at ${address}.` };
+    }
+    return { ok: false, error: `Could not resolve ${address} via ${mirrorNodeUrl(network)}: ${result.error}` };
+  }
+
+  const contractId = result.value.contract_id;
+  if (contractId === undefined) {
+    return { ok: false, error: `Mirror Node reported no contract_id for ${address}.` };
+  }
+  return { ok: true, value: contractId };
 }
 
 /** A transaction as the UI needs it, with the fields that identify what ran. */

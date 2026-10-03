@@ -42,9 +42,26 @@ export function fields(entries: Record<string, string | number | boolean | null 
  *
  * `resolveEnvironment` throws on a missing or malformed variable; the CLI message is
  * noisy enough on its own, so it is printed verbatim.
+ *
+ * `requireOperator` defaults to false because the read-only scripts (`read:registry`,
+ * `oracle:read`, `verify:registry`) must work on a public relay with no credentials at
+ * all. Pass true only from a script that is about to sign — otherwise a missing key
+ * surfaces much later as an opaque signer or relay error instead of naming the
+ * variable that is absent.
  */
-export function requireEnvironment(): ResolvedEnvironment {
-  return resolveEnvironment(process.env);
+export function requireEnvironment(options: { readonly requireOperator?: boolean } = {}): ResolvedEnvironment {
+  return resolveEnvironment(process.env, options);
+}
+
+/**
+ * The environment for a script that signs a transaction.
+ *
+ * Same as {@link requireEnvironment} with `requireOperator` set, named so the intent
+ * is visible at the call site and so no caller can forget the flag and only discover
+ * the omission when Hardhat reports it has no signer.
+ */
+export function requireSigningEnvironment(): ResolvedEnvironment {
+  return resolveEnvironment(process.env, { requireOperator: true });
 }
 
 /**

@@ -1,10 +1,27 @@
+import path from "node:path";
 import * as dotenv from "dotenv";
 import type { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-ethers";
 import "@nomicfoundation/hardhat-chai-matchers";
 import "@typechain/hardhat";
 
-dotenv.config();
+/**
+ * Loads env files for the deploy scripts.
+ *
+ * `yarn hardhat:deploy` runs with `packages/hardhat` as the working directory, so a
+ * bare `dotenv.config()` only ever looked for `packages/hardhat/.env` — while the
+ * documented location is `.env` at the repo root. The root file was therefore
+ * invisible to Hardhat, `deployerAccounts()` returned `[]`, and every deploy failed
+ * with a network error instead of a missing-credential error.
+ *
+ * Root first, then this package: `dotenv.config` does not overwrite variables that
+ * are already set, so the first file to define a value wins and the more specific
+ * path overrides the repo-wide one. A variable exported in the real shell still
+ * beats both, which is what CI and one-off overrides rely on.
+ */
+for (const envPath of [path.join(__dirname, "..", "..", ".env"), path.join(__dirname, ".env")]) {
+  dotenv.config({ path: envPath });
+}
 
 /**
  * Hedera JSON-RPC relay per network. Free, public, no key required.

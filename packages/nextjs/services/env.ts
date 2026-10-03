@@ -13,6 +13,8 @@
 
 import "server-only";
 
+import fs from "fs";
+import path from "path";
 import {
   resolveEnvironment,
   toBrowserEnvironment,
@@ -20,28 +22,52 @@ import {
   type ResolvedEnvironment,
 } from "@sh/shared";
 
-let cached: ResolvedEnvironment | undefined;
+function ensureEnvLoaded() {
+  const rootDir = path.resolve(process.cwd(), "../../");
+  const pkgDir = process.cwd();
+  const candidates = [
+    path.join(pkgDir, ".env.local"),
+    path.join(pkgDir, ".env"),
+    path.join(rootDir, ".env.local"),
+    path.join(rootDir, ".env"),
+  ];
+  for (const candidate of candidates) {
+    if (!fs.existsSync(candidate)) continue;
+    try {
+      const content = fs.readFileSync(candidate, "utf8");
+      for (const line of content.split("\n")) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith("#")) continue;
+        const eqIndex = trimmed.indexOf("=");
+        if (eqIndex === -1) continue;
+        const key = trimmed.slice(0, eqIndex).trim();
+        let value = trimmed.slice(eqIndex + 1).trim();
+        if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+          value = value.slice(1, -1);
+        }
+        if (key && (process.env[key] === undefined || process.env[key] === "")) {
+          process.env[key] = value;
+        }
+      }
+    } catch {
+      // Ignore read failures
+    }
+  }
+}
 
 /**
  * The resolved server environment.
- *
- * Cached because `resolveEnvironment` validates every key and throws on a malformed
- * one; doing that per request would turn a misconfigured deployment into a
- * different error message on every call site.
  */
 export function serverEnvironment(): ResolvedEnvironment {
-  cached ??= resolveEnvironment(process.env);
-  return cached;
+  ensureEnvLoaded();
+  return resolveEnvironment(process.env);
 }
 
 /**
  * The environment, requiring operator credentials.
- *
- * Used only by the endpoint that signs: the attestation publisher and any
- * operator-signed registry call. Read paths call `serverEnvironment` instead so a
- * deployment with no operator key still serves the dashboard.
  */
 export function operatorEnvironment(): ResolvedEnvironment {
+  ensureEnvLoaded();
   return resolveEnvironment(process.env, { requireOperator: true });
 }
 

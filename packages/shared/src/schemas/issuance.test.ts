@@ -229,7 +229,7 @@ describe("attestationEnvelopeSchema", () => {
 
 describe("verificationRequestSchema", () => {
   it("accepts a topic id", () => {
-    expect(verificationRequestSchema.safeParse({ topicId: "0.0.5000009" }).success).toBe(true);
+    expect(verificationRequestSchema.safeParse({ topicId: "0.0.10828689" }).success).toBe(true);
   });
 
   it("accepts a transaction id in Hedera form", () => {

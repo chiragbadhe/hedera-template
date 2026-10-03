@@ -66,7 +66,7 @@ describe("resolveEnvironment", () => {
       ...OPERATOR,
       [ENV_KEYS.jsonRpcUrl]: "https://example.test/api",
       [ENV_KEYS.mirrorNodeUrl]: "https://mirror.test",
-      [ENV_KEYS.attestationTopicId]: "0.0.5000009",
+      [ENV_KEYS.attestationTopicId]: "0.0.10828689",
       [ENV_KEYS.registryAddress]: "0xabc",
       [ENV_KEYS.registryContractId]: "0.0.5000003",
       [ENV_KEYS.feedId]: `0x${"11".repeat(32)}`,
@@ -75,7 +75,7 @@ describe("resolveEnvironment", () => {
     expect(env.operatorAccountId).toBe("0.0.12345");
     expect(env.operatorPrivateKey).toBe(OPERATOR[ENV_KEYS.operatorPrivateKey]);
     expect(env.jsonRpcUrl).toBe("https://example.test/api");
-    expect(env.attestationTopicId).toBe("0.0.5000009");
+    expect(env.attestationTopicId).toBe("0.0.10828689");
     expect(env.registryAddress).toBe("0xabc");
   });
 

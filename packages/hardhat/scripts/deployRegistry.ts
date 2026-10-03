@@ -31,15 +31,25 @@ import {
   hederaNetworkForHardhatNetwork,
   isRealHederaNetwork,
   oracleAddressForDeploy,
-  requireEnvironment,
+  requireSigningEnvironment,
 } from "./lib/scriptHelpers";
 
 async function main(): Promise<void> {
-  const environment = requireEnvironment();
+  const environment = requireSigningEnvironment();
   const hederaNetwork = hederaNetworkForHardhatNetwork();
 
+  // Hardhat only reports "no signers" for the network it was pointed at, which reads
+  // like a bad relay URL. Name the credential instead, so an unset or unloaded key is
+  // not mistaken for a network problem.
   const deployerAddress = await hre.ethers.getSigners().then((signers) => signers[0]?.getAddress());
-  if (!deployerAddress) throw new Error("no deployer signer is available; check the network configuration");
+  if (!deployerAddress) {
+    throw new Error(
+      `network "${currentNetworkName()}" has no signer configured even though ${ENV_KEYS.operatorPrivateKey} is set. ` +
+        `This almost always means the env file was never loaded: Hardhat reads .env from the repo root and from ` +
+        `packages/hardhat, not from .env.example. Copy .env.example to .env at the repo root and fill in ` +
+        `${ENV_KEYS.operatorAccountId} and ${ENV_KEYS.operatorPrivateKey}.`,
+    );
+  }
 
   // Nothing off-chain can describe a chain that does not exist yet, so a dry run
   // reports only what the local chain can answer for itself.
@@ -135,7 +145,7 @@ async function main(): Promise<void> {
  * from a real one after the fact.
  */
 async function resolveOracle(realNetwork: boolean): Promise<{ address: string; isMock: boolean }> {
-  const environment = requireEnvironment();
+  const environment = requireSigningEnvironment();
 
   if (realNetwork) {
     if (process.env[ENV_KEYS.oracleAddress] !== undefined && (await isMockDeployment())) {
@@ -169,7 +179,7 @@ async function resolveOracle(realNetwork: boolean): Promise<{ address: string; i
 
 /** True when `PYTH_ORACLE_ADDRESS` names a contract this repo recognises as a mock. */
 async function isMockDeployment(): Promise<boolean> {
-  const address = requireEnvironment().oracleAddress;
+  const address = requireSigningEnvironment().oracleAddress;
   if (!address) return false;
   try {
     const code = await hre.ethers.provider.getCode(address);

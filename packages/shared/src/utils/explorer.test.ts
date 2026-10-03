@@ -7,7 +7,7 @@ describe("hashscanUrl", () => {
       "https://hashscan.io/testnet/transaction/0.0.5000002%401787525955.000000000",
     );
     expect(hashscanUrl("testnet", "contract", "0xabc")).toBe("https://hashscan.io/testnet/contract/0xabc");
-    expect(hashscanUrl("testnet", "topic", "0.0.5000009")).toBe("https://hashscan.io/testnet/topic/0.0.5000009");
+    expect(hashscanUrl("testnet", "topic", "0.0.10828689")).toBe("https://hashscan.io/testnet/topic/0.0.10828689");
     expect(hashscanUrl("testnet", "token", "0.0.5000001")).toBe("https://hashscan.io/testnet/token/0.0.5000001");
   });
 
@@ -36,8 +36,8 @@ describe("mirror node urls", () => {
     expect(mirrorTransactionUrl("testnet", "0.0.5000002@1787525955.000000000")).toBe(
       "https://testnet.mirrornode.hedera.com/api/v1/transactions/0.0.5000002%401787525955.000000000",
     );
-    expect(mirrorTopicMessagesUrl("testnet", "0.0.5000009")).toBe(
-      "https://testnet.mirrornode.hedera.com/api/v1/topics/0.0.5000009/messages",
+    expect(mirrorTopicMessagesUrl("testnet", "0.0.10828689")).toBe(
+      "https://testnet.mirrornode.hedera.com/api/v1/topics/0.0.10828689/messages",
     );
     expect(mirrorTokenUrl("mainnet", "0.0.1234")).toBe("https://mainnet.mirrornode.hedera.com/api/v1/tokens/0.0.1234");
   });

@@ -43,7 +43,16 @@ export type AttestationAssetRef = {
 export type AttestationIssuanceRef = {
   /** Units minted, in base units, as a decimal string. */
   readonly units: string;
-  /** Transaction id of the HTS token-create/mint that produced the supply. */
+  /**
+   * Transaction that produced this record, `0.0.x@seconds.nanos`.
+   *
+   * When an HTS mint created the supply, that is the mint. Otherwise it is the
+   * HCS `TopicMessageSubmitTransaction` that carried this envelope to consensus,
+   * which is the transaction this template actually signs — it reserves the
+   * transaction id *before* hashing, so the id inside the digest is the id the
+   * network assigns. Verification only reads the seconds field, to assert the
+   * payload reached consensus before the registry recorded it.
+   */
   readonly txId: string;
 };
 

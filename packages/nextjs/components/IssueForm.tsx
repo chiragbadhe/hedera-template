@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useWallet } from "~~/hooks/useWallet";
 import { usePolling } from "~~/hooks/usePolling";
 import { apiFetch } from "~~/utils/api";
@@ -14,6 +15,8 @@ import {
   RefreshCw,
   Wallet,
   Key,
+  Copy,
+  Check,
 } from "lucide-react";
 
 type OracleRes = {
@@ -33,34 +36,48 @@ type OracleRes = {
 type AttestSubmitRes = {
   ok: boolean;
   transactionHash?: string;
+  contractTxHash?: string;
   recordId?: string;
   digest?: string;
+  alreadyRecorded?: boolean;
+  hcs?: {
+    topicId: string;
+    transactionId: string;
+    sequenceNumber: string | null;
+    consensusTimestamp: string | null;
+    runningHash: string | null;
+    hashscanUrl: string | null;
+  };
+  priceUsd?: string;
   error?: string;
 };
 
 export function IssueForm() {
-  const { isConnected, address, walletType, targetNetworkConfig } = useWallet();
+  const { isConnected, address, walletType, targetNetworkConfig, activeNetwork } = useWallet();
   const oracle = usePolling(() => apiFetch<OracleRes>("/api/oracle"), 10_000);
 
-  const [assetToken, setAssetToken] = useState("0.0.54321");
+  const [assetToken, setAssetToken] = useState("0.0.10840780");
   const [units, setUnits] = useState("1000");
-  const [signingMethod, setSigningMethod] = useState<"wallet" | "operator">("wallet");
+  const [signingMethod, setSigningMethod] = useState<"wallet" | "operator">("operator");
 
-  const [txStep, setTxStep] = useState<"idle" | "preparing" | "awaiting" | "submitting" | "confirmed" | "failed">("idle");
+  const [txStep, setTxStep] = useState<
+    "idle" | "evaluating" | "publishing_hcs" | "recording_contract" | "confirmed" | "failed"
+  >("idle");
   const [txError, setTxError] = useState<string | null>(null);
   const [txResult, setTxResult] = useState<AttestSubmitRes | null>(null);
+  const [copied, setCopied] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      setTxStep("preparing");
+      setTxStep("evaluating");
       setTxError(null);
       setTxResult(null);
 
-      // Step 1: Prepare & Simulate
-      await new Promise((r) => setTimeout(r, 600));
+      // Step 1: Evaluating attestation policy & building envelope
+      await new Promise((r) => setTimeout(r, 400));
 
-      setTxStep("awaiting");
+      setTxStep("publishing_hcs");
 
       // Step 2: Submit attestation via API endpoint
       const res = await apiFetch<AttestSubmitRes>("/api/attest", {
@@ -76,6 +93,9 @@ export function IssueForm() {
       if (!res.ok) {
         setTxStep("failed");
         setTxError(res.error || "Transaction submission failed.");
+        if (res.hcs || res.digest) {
+          setTxResult(res);
+        }
         return;
       }
 
@@ -87,6 +107,14 @@ export function IssueForm() {
     }
   }
 
+  const handleCopyDigest = () => {
+    if (txResult?.digest) {
+      navigator.clipboard.writeText(txResult.digest);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-6 md:p-8 backdrop-blur-sm shadow-xl space-y-6">
@@ -97,7 +125,7 @@ export function IssueForm() {
           <div>
             <h1 className="text-xl font-bold text-white">Issue &amp; Stamp Asset Record</h1>
             <p className="text-xs text-neutral-400">
-              Stamp an HTS token reference with a Pyth observation and compute an attestation digest
+              Stamp an HTS token reference with Pyth oracle pricing, publish to HCS &amp; record in the smart contract registry
             </p>
           </div>
         </div>
@@ -108,7 +136,7 @@ export function IssueForm() {
             <div className="flex items-center gap-2">
               <Zap className="h-4 w-4 text-emerald-400" />
               <div>
-                <span className="font-semibold text-white">Live Oracle Feed:</span>{" "}
+                <span className="font-semibold text-white">Live Pyth Oracle Feed:</span>{" "}
                 <span className="text-emerald-300 font-mono font-bold">${oracle.data.value.priceUsd} USD</span>
               </div>
             </div>
@@ -123,14 +151,14 @@ export function IssueForm() {
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-neutral-300 flex items-center justify-between">
               <span>Hedera Asset Token ID</span>
-              <span className="text-[11px] text-neutral-500 font-normal">HTS Entity ID or Hex</span>
+              <span className="text-[11px] text-neutral-500 font-normal">HTS Entity ID (0.0.x)</span>
             </label>
             <input
               type="text"
               required
               value={assetToken}
               onChange={(e) => setAssetToken(e.target.value)}
-              placeholder="e.g. 0.0.54321"
+              placeholder="e.g. 0.0.10840780"
               className="w-full rounded-xl border border-neutral-800 bg-neutral-950 px-4 py-2.5 text-xs text-white font-mono placeholder:text-neutral-600 focus:border-indigo-500 focus:outline-none transition"
             />
           </div>
@@ -150,8 +178,24 @@ export function IssueForm() {
 
           {/* Form Field 3: Signing Method */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-neutral-300">Wallet Signing Mode</label>
+            <label className="text-xs font-semibold text-neutral-300">Signing Mode</label>
             <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setSigningMethod("operator")}
+                className={`flex items-center gap-3 rounded-xl border p-3 text-left transition ${
+                  signingMethod === "operator"
+                    ? "border-indigo-500 bg-indigo-500/10 text-white"
+                    : "border-neutral-800 bg-neutral-950/60 text-neutral-400 hover:border-neutral-700"
+                }`}
+              >
+                <Key className="h-4 w-4 text-emerald-400 shrink-0" />
+                <div>
+                  <div className="text-xs font-semibold">Server Operator Key</div>
+                  <div className="text-[10px] text-neutral-400">Automated attestation signer</div>
+                </div>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setSigningMethod("wallet")}
@@ -169,35 +213,19 @@ export function IssueForm() {
                   </div>
                 </div>
               </button>
-
-              <button
-                type="button"
-                onClick={() => setSigningMethod("operator")}
-                className={`flex items-center gap-3 rounded-xl border p-3 text-left transition ${
-                  signingMethod === "operator"
-                    ? "border-indigo-500 bg-indigo-500/10 text-white"
-                    : "border-neutral-800 bg-neutral-950/60 text-neutral-400 hover:border-neutral-700"
-                }`}
-              >
-                <Key className="h-4 w-4 text-emerald-400 shrink-0" />
-                <div>
-                  <div className="text-xs font-semibold">Server Operator Key</div>
-                  <div className="text-[10px] text-neutral-400">Automated attestation agent</div>
-                </div>
-              </button>
             </div>
           </div>
 
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={txStep === "preparing" || txStep === "awaiting" || txStep === "submitting"}
+            disabled={txStep === "evaluating" || txStep === "publishing_hcs" || txStep === "recording_contract"}
             className="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-xs font-semibold text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 active:scale-98 transition disabled:opacity-50"
           >
-            {txStep === "preparing" || txStep === "awaiting" || txStep === "submitting" ? (
+            {txStep === "evaluating" || txStep === "publishing_hcs" || txStep === "recording_contract" ? (
               <>
                 <RefreshCw className="h-4 w-4 animate-spin" />
-                <span>Processing Attestation...</span>
+                <span>Processing Transaction Lifecycle...</span>
               </>
             ) : (
               <>
@@ -211,49 +239,66 @@ export function IssueForm() {
         {/* Transaction Lifecycle Status Panel */}
         {txStep !== "idle" && (
           <div className="rounded-xl border border-neutral-800 bg-neutral-950 p-5 space-y-4 animate-in fade-in duration-200">
-            <div className="text-xs font-semibold text-white border-b border-neutral-800 pb-2">
-              Transaction Lifecycle Progress
+            <div className="text-xs font-semibold text-white border-b border-neutral-800 pb-2 flex items-center justify-between">
+              <span>Transaction Lifecycle Execution</span>
+              <span className="text-[11px] text-neutral-400 font-mono">Network: {activeNetwork}</span>
             </div>
 
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-xs">
                 <span
                   className={`h-2.5 w-2.5 rounded-full ${
-                    txStep === "preparing"
+                    txStep === "evaluating"
                       ? "bg-indigo-400 animate-ping"
-                      : txStep === "confirmed"
+                      : txStep === "publishing_hcs" || txStep === "recording_contract" || txStep === "confirmed"
                         ? "bg-emerald-400"
                         : "bg-neutral-600"
                   }`}
                 />
-                <span className={txStep === "preparing" ? "text-white font-medium" : "text-neutral-400"}>
-                  1. Evaluating attestation policy &amp; keccak256 digest
+                <span className={txStep === "evaluating" ? "text-white font-medium" : "text-neutral-400"}>
+                  1. Evaluating attestation policy &amp; computing keccak256 digest
                 </span>
               </div>
 
               <div className="flex items-center gap-3 text-xs">
                 <span
                   className={`h-2.5 w-2.5 rounded-full ${
-                    txStep === "awaiting"
+                    txStep === "publishing_hcs"
                       ? "bg-indigo-400 animate-ping"
-                      : txStep === "confirmed"
+                      : txStep === "recording_contract" || txStep === "confirmed" || (txResult && txResult.hcs)
                         ? "bg-emerald-400"
                         : "bg-neutral-600"
                   }`}
                 />
-                <span className={txStep === "awaiting" ? "text-white font-medium" : "text-neutral-400"}>
-                  2. Awaiting signature confirmation
+                <span
+                  className={
+                    txStep === "publishing_hcs"
+                      ? "text-white font-medium"
+                      : txResult && txResult.hcs
+                        ? "text-emerald-400 font-medium"
+                        : "text-neutral-400"
+                  }
+                >
+                  2. Publishing canonical envelope to HCS topic
+                  {txResult?.hcs?.sequenceNumber && ` (Seq #${txResult.hcs.sequenceNumber})`}
                 </span>
               </div>
 
               <div className="flex items-center gap-3 text-xs">
                 <span
                   className={`h-2.5 w-2.5 rounded-full ${
-                    txStep === "confirmed" ? "bg-emerald-400" : txStep === "failed" ? "bg-red-500" : "bg-neutral-600"
+                    txStep === "recording_contract"
+                      ? "bg-indigo-400 animate-ping"
+                      : txStep === "confirmed"
+                        ? "bg-emerald-400"
+                        : txStep === "failed" && !txResult?.contractTxHash
+                          ? "bg-red-500"
+                          : "bg-neutral-600"
                   }`}
                 />
                 <span className={txStep === "confirmed" ? "text-emerald-400 font-medium" : "text-neutral-400"}>
-                  3. Digest prepared (HCS publish / registry write not yet wired)
+                  3. Recording attestation digest in smart contract registry
+                  {txResult?.alreadyRecorded && " (Already recorded on-chain)"}
                 </span>
               </div>
             </div>
@@ -262,34 +307,107 @@ export function IssueForm() {
               <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-xs text-red-300 flex items-start gap-2">
                 <AlertTriangle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-semibold">Attestation Rejection</div>
+                  <div className="font-semibold">Execution Issue</div>
                   <p className="mt-0.5">{txError}</p>
                 </div>
               </div>
             )}
 
             {txResult && txResult.ok && (
-              <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs space-y-2">
-                <div className="flex items-center gap-2 text-emerald-300 font-semibold">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                  Attestation digest ready (preview — not broadcast)
+              <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4 text-xs space-y-3">
+                <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2">
+                  <div className="flex items-center gap-2 text-emerald-300 font-semibold text-sm">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                    Attestation Broadcast &amp; Recorded Successfully
+                  </div>
+                  {txResult.alreadyRecorded && (
+                    <span className="rounded-full bg-indigo-500/20 px-2 py-0.5 text-[10px] font-semibold text-indigo-300 border border-indigo-500/30">
+                      Idempotent Record
+                    </span>
+                  )}
                 </div>
-                {txResult.recordId && (
-                  <div className="font-mono text-neutral-300 text-[11px] break-all">
-                    Record ID: {txResult.recordId}
+
+                {/* Digest display */}
+                {txResult.digest && (
+                  <div className="space-y-1">
+                    <div className="text-[11px] font-semibold text-neutral-300 flex items-center justify-between">
+                      <span>Attestation Digest (keccak256):</span>
+                      <button
+                        onClick={handleCopyDigest}
+                        className="flex items-center gap-1 text-[10px] text-indigo-300 hover:text-white transition"
+                      >
+                        {copied ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                        {copied ? "Copied" : "Copy Digest"}
+                      </button>
+                    </div>
+                    <div className="font-mono text-white text-[11px] bg-neutral-900/80 p-2 rounded-lg break-all border border-neutral-800">
+                      {txResult.digest}
+                    </div>
                   </div>
                 )}
-                <div className="pt-2">
-                  <a
-                    href={`${targetNetworkConfig.explorerUrl}/transaction/${txResult.transactionHash}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-300 hover:text-white transition"
-                  >
-                    View Transaction on HashScan
-                    <ExternalLink className="h-3.5 w-3.5" />
-                  </a>
-                </div>
+
+                {/* HCS Publication Details */}
+                {txResult.hcs && (
+                  <div className="space-y-1 pt-1 border-t border-emerald-500/20">
+                    <div className="text-[11px] font-semibold text-emerald-300 flex items-center justify-between">
+                      <span>HCS Message Details:</span>
+                      {txResult.hcs.hashscanUrl && (
+                        <a
+                          href={txResult.hcs.hashscanUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] font-medium text-indigo-300 hover:text-white transition"
+                        >
+                          View HCS Tx on HashScan
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-[11px] font-mono text-neutral-300 bg-neutral-900/50 p-2 rounded-lg border border-neutral-800">
+                      <div><span className="text-neutral-500">Topic ID:</span> {txResult.hcs.topicId}</div>
+                      <div><span className="text-neutral-500">Sequence #:</span> {txResult.hcs.sequenceNumber ?? "Pending"}</div>
+                      <div className="col-span-2 truncate"><span className="text-neutral-500">Tx ID:</span> {txResult.hcs.transactionId}</div>
+                      {txResult.hcs.consensusTimestamp && (
+                        <div className="col-span-2"><span className="text-neutral-500">Consensus:</span> {txResult.hcs.consensusTimestamp}</div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Registry Contract Details */}
+                {txResult.contractTxHash && txResult.contractTxHash !== "0x0000000000000000000000000000000000000000000000000000000000000000" && (
+                  <div className="space-y-1 pt-1 border-t border-emerald-500/20">
+                    <div className="text-[11px] font-semibold text-emerald-300 flex items-center justify-between">
+                      <span>Registry Contract Write:</span>
+                      <a
+                        href={`${targetNetworkConfig.explorerUrl}/transaction/${txResult.contractTxHash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] font-medium text-indigo-300 hover:text-white transition"
+                      >
+                        View EVM Tx on HashScan
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </div>
+                    <div className="font-mono text-white text-[11px] bg-neutral-900/50 p-2 rounded-lg break-all border border-neutral-800">
+                      {txResult.contractTxHash}
+                    </div>
+                  </div>
+                )}
+
+                {/* Verification CTA button */}
+                {txResult.digest && (
+                  <div className="pt-2">
+                    <Link
+                      href={`/verify?digest=${encodeURIComponent(txResult.digest)}`}
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-semibold text-white hover:bg-emerald-500 transition shadow-md"
+                    >
+                      <ShieldCheck className="h-4 w-4" />
+                      <span>Verify This Attestation Now</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -298,3 +416,4 @@ export function IssueForm() {
     </div>
   );
 }
+
