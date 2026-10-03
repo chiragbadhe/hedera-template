@@ -1,0 +1,63 @@
+{
+  "name": "priced-asset-registry",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Scaffold-HBAR external template: oracle-stamped HTS asset registry with HCS attestations and Mirror Node verification.",
+  "license": "MIT",
+  "workspaces": {
+    "packages": [
+      "packages/shared",
+      "packages/hardhat",
+      "packages/nextjs"
+    ]
+  },
+  "scripts": {
+    "build": "yarn next:build",
+    "check-types": "yarn shared:check-types && yarn hardhat:check-types && yarn next:check-types",
+    "format": "yarn next:format && yarn hardhat:format && yarn shared:format",
+    "format:check": "yarn next:format:check && yarn hardhat:format:check && yarn shared:format:check",
+    "hardhat:account:generate": "yarn workspace @sh/hardhat account:generate",
+    "hardhat:account:import": "yarn workspace @sh/hardhat account:import",
+    "hardhat:check-types": "yarn workspace @sh/hardhat check-types",
+    "hardhat:clean": "yarn workspace @sh/hardhat clean",
+    "hardhat:compile": "yarn workspace @sh/hardhat compile",
+    "hardhat:deploy": "yarn workspace @sh/hardhat deploy",
+    "hardhat:deploy:local": "yarn workspace @sh/hardhat deploy:local",
+    "hardhat:deploy:mainnet": "yarn workspace @sh/hardhat deploy:mainnet",
+    "hardhat:flatten": "yarn workspace @sh/hardhat flatten",
+    "hardhat:format": "yarn workspace @sh/hardhat format",
+    "hardhat:format:check": "yarn workspace @sh/hardhat format:check",
+    "hardhat:generate:abis": "yarn workspace @sh/hardhat generate:abis",
+    "hardhat:lint": "yarn workspace @sh/hardhat lint",
+    "hardhat:oracle:read": "yarn workspace @sh/hardhat oracle:read",
+    "hardhat:test": "yarn workspace @sh/hardhat test",
+    "lint": "yarn next:lint && yarn hardhat:lint && yarn shared:lint",
+    "next:build": "yarn workspace @sh/nextjs build",
+    "next:check-types": "yarn workspace @sh/nextjs check-types",
+    "next:dev": "yarn workspace @sh/nextjs dev",
+    "next:format": "yarn workspace @sh/nextjs format",
+    "next:format:check": "yarn workspace @sh/nextjs format:check",
+    "next:lint": "yarn workspace @sh/nextjs lint",
+    "next:serve": "yarn workspace @sh/nextjs serve",
+    "next:start": "yarn workspace @sh/nextjs start",
+    "postinstall": "yarn workspace @sh/shared build",
+    "registry:read": "yarn workspace @sh/hardhat read:registry",
+    "registry:verify": "yarn workspace @sh/hardhat verify:registry",
+    "shared:build": "yarn workspace @sh/shared build",
+    "shared:check-types": "yarn workspace @sh/shared check-types",
+    "shared:format": "yarn workspace @sh/shared format",
+    "shared:format:check": "yarn workspace @sh/shared format:check",
+    "shared:lint": "yarn workspace @sh/shared lint",
+    "shared:test": "yarn workspace @sh/shared test",
+    "test": "yarn workspace @sh/shared test && yarn workspace @sh/nextjs test && yarn workspace @sh/hardhat test",
+    "test:watch": "yarn workspace @sh/shared test:watch",
+    "verify": "yarn format:check && yarn lint && yarn check-types && yarn test && yarn build"
+  },
+  "devDependencies": {
+    "prettier": "3.9.9"
+  },
+  "engines": {
+    "node": ">=20.18.3"
+  },
+  "packageManager": "yarn@4.9.2"
+}

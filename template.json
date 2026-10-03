@@ -1,0 +1,91 @@
+{
+  "name": "priced-asset-registry",
+  "description": "Oracle-stamped HTS asset registry using Pyth (read-only), HCS attestation digests, Mirror Node verification, and a Next.js + Hardhat + shared monorepo.",
+  "create-scaffold-hbar": {
+    "capabilities": {
+      "frontend": ["nextjs-app"],
+      "solidityFramework": ["hardhat"]
+    },
+    "defaults": {
+      "frontend": "nextjs-app",
+      "solidityFramework": "hardhat",
+      "network": "testnet"
+    },
+    "outro": {
+      "sections": [
+        {
+          "steps": [
+            {
+              "text": "This external Scaffold-HBAR template records HTS issuance claims against a live Pyth observation, stores a keccak256 attestation digest, and verifies envelopes via Mirror Node. Pyth on Hedera is currently a read-only integration."
+            }
+          ]
+        },
+        {
+          "title": "Suggested steps",
+          "steps": [
+            {
+              "label": "Copy environment template",
+              "command": "cp .env.example .env"
+            },
+            {
+              "label": "Generate a deployer account",
+              "command": "{run:hardhat:account:generate}"
+            },
+            {
+              "label": "Fund the account with testnet HBAR",
+              "url": "https://portal.hedera.com/faucet"
+            },
+            {
+              "label": "Compile and test contracts",
+              "command": "{run:hardhat:compile}"
+            },
+            {
+              "label": "Run Hardhat unit tests",
+              "command": "{run:hardhat:test}"
+            },
+            {
+              "label": "Deploy PricedAssetRegistry to Hedera testnet",
+              "command": "{run:hardhat:deploy}"
+            },
+            {
+              "label": "Start the Next.js app",
+              "command": "{run:next:dev}"
+            },
+            {
+              "text": "Set NEXT_PUBLIC_REGISTRY_ADDRESS from the deploy output (also written under .deploy/). Read docs/getting-started.md for the full workflow and current issuance limitations."
+            }
+          ]
+        }
+      ]
+    },
+    "rename": {
+      "packages/shared": "packages/shared",
+      "packages/hardhat": "packages/hardhat",
+      "packages/nextjs": "packages/nextjs"
+    },
+    "env": {
+      "defaults": {
+        "HEDERA_NETWORK": "testnet",
+        "NEXT_PUBLIC_ORACLE_FEED_ID": "0x3728e591097635310e6341af53db8b7ee42da9b3a8d918f9463ce9cca886dfbd",
+        "REGISTRY_MAX_PRICE_AGE_SECONDS": "7776000",
+        "REGISTRY_MAX_DEVIATION_BPS": "50"
+      },
+      "serverOnly": [
+        "HEDERA_OPERATOR_ACCOUNT_ID",
+        "HEDERA_OPERATOR_PRIVATE_KEY",
+        "HEDERA_JSON_RPC_URL",
+        "HEDERA_MIRROR_NODE_URL",
+        "PYTH_ORACLE_ADDRESS"
+      ],
+      "public": [
+        "HEDERA_NETWORK",
+        "NEXT_PUBLIC_ORACLE_FEED_ID",
+        "NEXT_PUBLIC_REGISTRY_ADDRESS",
+        "NEXT_PUBLIC_REGISTRY_CONTRACT_ID",
+        "HEDERA_ATTESTATION_TOPIC_ID",
+        "NEXT_PUBLIC_REOWN_PROJECT_ID",
+        "NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID"
+      ]
+    }
+  }
+}

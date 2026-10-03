@@ -1,0 +1,22 @@
+# Build output / dependencies
+node_modules
+.next
+dist
+out
+coverage
+typechain-types
+artifacts
+cache
+
+# Yarn
+.yarn
+.pnp.*
+
+# Lockfiles and generated ABI registries are machine-written
+yarn.lock
+packages/nextjs/contracts/deployedContracts.ts
+packages/hardhat/deployments
+packages/hardhat/abis
+
+# Docs snapshots
+*.md

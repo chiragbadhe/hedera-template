@@ -1,0 +1,55 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build output
+.next
+out
+dist
+build
+*.tsbuildinfo
+
+# Solidity / Hardhat
+packages/hardhat/artifacts
+packages/hardhat/cache
+packages/hardhat/typechain-types
+packages/hardhat/coverage
+packages/hardhat/coverage.json
+
+# Deployment records written by `hardhat:deploy` — machine-specific addresses
+.deploy
+
+# Yarn (Berry) — only the checked-in release shim is tracked
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# Test / tooling caches
+coverage
+.vitest
+.eslintcache
+
+# Environment — never commit a populated env file
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Local secrets and keystores
+packages/hardhat/keystores
+*.key
+*.pem
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea
+.vscode/*
+!.vscode/extensions.json
